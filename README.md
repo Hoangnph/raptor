@@ -55,18 +55,19 @@ RAPTOR stands for Recursive Autonomous Penetration Testing and Observation Robot
 (We really wanted to name it RAPTOR)
 
 **RAPTOR autonomously**:
-1. **Scans** your code with Semgrep and CodeQL and tries dataflow validation
-2. **Fuzzes** your binaries with American Fuzzy Lop (AFL)
-3. **Analyses** vulnerabilities using advanced LLM reasoning
-4. **Exploits** by generating proof-of-concepts
-5. **Patches** with code to fix vulnerabilities
-6. **FFmpeg-specific** patching for Google's recent disclosure
+1. **Code Understanding:** Adversarial code comprehension — map attack surface, trace data flows, hunt for vulnerability variants
+2. **Scans** your code with Semgrep and CodeQL and tries dataflow validation
+3. **Fuzzes** your binaries with American Fuzzy Lop (AFL)
+4. **Analyses** vulnerabilities using advanced LLM reasoning
+5. **Exploits** by generating proof-of-concepts
+6. **Patches** with code to fix vulnerabilities
+7. **FFmpeg-specific** patching for Google's recent disclosure
    (https://news.ycombinator.com/item?id=45891016)
-7. **OSS Forensics** for evidence-backed GitHub repository investigations
-8. **Agentic Skills Engine** for security research & operations ([SecOpsAgentKit](https://github.com/AgentSecOps/SecOpsAgentKit))
-9. **Offensive Security Testing** via autonomous specialist agent with SecOpsAgentKit
-10. **Cost Management** with budget enforcement, real-time tracking, and quota detection
-11. **Reports** everything in structured formats
+8. **OSS Forensics** for evidence-backed GitHub repository investigations
+9. **Agentic Skills Engine** for security research & operations ([SecOpsAgentKit](https://github.com/AgentSecOps/SecOpsAgentKit))
+10. **Offensive Security Testing** via autonomous specialist agent with SecOpsAgentKit
+11. **Cost Management** with budget enforcement, real-time tracking, and quota detection
+12. **Reports** everything in structured formats
 
 RAPTOR combines traditional security tools with agentic automation and analysis, deeply
 understands your code, proves exploitability, and proposes patches.
@@ -93,6 +94,7 @@ demonstrates how Claude Code can be adapted for **any purpose**, with RAPTOR pac
 - **SecOpsAgentKit:** Offensive security specialist agent with comprehensive penetration testing capabilities
 - **Cost Management:** Budget enforcement, real-time callbacks, and intelligent quota detection
 - **Enhanced Reliability:** Multiple bug fixes improving robustness across CodeQL, static analysis, and LLM providers
+- **Code Understanding** We wanted to build more adversarial code comprehension, which allows you to map attack surface, trace those vital data flows & hunt for vulnerability variants
 
 ---
 
@@ -278,6 +280,11 @@ docker build -f .devcontainer/Dockerfile -t raptor-devcontainer:latest .
 /exploit  - Generate exploit proof-of-concepts (beta)
 /patch    - Generate security patches for vulnerabilities (beta)
 /crash-analysis - Analyze an FFmpeg crash and generate a validated root-cause analysis
+```
+
+**Code understanding:**
+```
+/understand - Adversarial code comprehension: map attack surface, trace data flows, hunt variants
 ```
 
 **Forensics & investigation:**
