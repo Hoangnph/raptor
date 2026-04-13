@@ -1,0 +1,23 @@
+[
+  {
+    "id": "custom-sqli-test",
+    "name": "Custom SQL Injection Test",
+    "severity": "critical",
+    "tags": ["sqli", "custom", "injection"],
+    "technologies": ["mysql", "postgresql"]
+  },
+  {
+    "id": "custom-xss-dom",
+    "name": "Custom DOM XSS Test",
+    "severity": "high",
+    "tags": ["xss", "dom", "custom"],
+    "technologies": ["javascript"]
+  },
+  {
+    "id": "custom-open-redirect",
+    "name": "Custom Open Redirect Test",
+    "severity": "medium",
+    "tags": ["redirect", "custom"],
+    "technologies": ["nginx", "apache"]
+  }
+]

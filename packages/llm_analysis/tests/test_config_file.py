@@ -559,15 +559,33 @@ model_list:
 
 
 class TestConfigHasKeyedModelsSDKGating:
-    """Test that _config_has_keyed_models checks SDK availability."""
+    """Test that _config_has_keyed_models checks key availability.
 
-    def test_returns_false_when_no_sdk(self, tmp_path):
+    Models with inline API keys are usable regardless of SDK availability
+    — the key is already resolved, no SDK gate needed.
+    Models with env-var-only keys require SDK availability.
+    """
+
+    def test_returns_true_when_inline_key_no_sdk(self, tmp_path):
+        """Inline API key makes model usable even without SDK."""
         config = tmp_path / "models.json"
         config.write_text(json.dumps({"models": [
             {"provider": "anthropic", "model": "claude-opus-4-6", "api_key": "sk-ant-test"}
         ]}))
         from packages.llm_analysis.llm.detection import _config_has_keyed_models
         with patch.dict(os.environ, {"RAPTOR_CONFIG": str(config)}), \
+             patch("packages.llm_analysis.llm.detection.ANTHROPIC_SDK_AVAILABLE", False), \
+             patch("packages.llm_analysis.llm.detection.OPENAI_SDK_AVAILABLE", False):
+            assert _config_has_keyed_models() is True
+
+    def test_returns_false_when_env_key_no_sdk(self, tmp_path):
+        """Env-var key without SDK should return False."""
+        config = tmp_path / "models.json"
+        config.write_text(json.dumps({"models": [
+            {"provider": "anthropic", "model": "claude-opus-4-6"}
+        ]}))
+        from packages.llm_analysis.llm.detection import _config_has_keyed_models
+        with patch.dict(os.environ, {"RAPTOR_CONFIG": str(config), "ANTHROPIC_API_KEY": "sk-ant-test"}, clear=False), \
              patch("packages.llm_analysis.llm.detection.ANTHROPIC_SDK_AVAILABLE", False), \
              patch("packages.llm_analysis.llm.detection.OPENAI_SDK_AVAILABLE", False):
             assert _config_has_keyed_models() is False
@@ -582,16 +600,29 @@ class TestConfigHasKeyedModelsSDKGating:
              patch("packages.llm_analysis.llm.detection.ANTHROPIC_SDK_AVAILABLE", True):
             assert _config_has_keyed_models() is True
 
-    def test_ollama_requires_openai_sdk(self, tmp_path):
+    def test_ollama_provider_needs_openAI_sdk(self, tmp_path):
+        """Ollama config entry without inline key requires OpenAI SDK."""
         config = tmp_path / "models.json"
         config.write_text(json.dumps({"models": [
-            {"provider": "ollama", "model": "llama3", "api_key": "unused"}
+            {"provider": "ollama", "model": "llama3"}
+        ]}))
+        from packages.llm_analysis.llm.detection import _config_has_keyed_models
+        with patch.dict(os.environ, {"RAPTOR_CONFIG": str(config)}, clear=False), \
+             patch("packages.llm_analysis.llm.detection.OPENAI_SDK_AVAILABLE", False), \
+             patch("packages.llm_analysis.llm.detection.ANTHROPIC_SDK_AVAILABLE", False):
+            assert _config_has_keyed_models() is False
+
+    def test_ollama_with_inline_key_works_without_sdk(self, tmp_path):
+        """Ollama entry with inline key is usable without OpenAI SDK."""
+        config = tmp_path / "models.json"
+        config.write_text(json.dumps({"models": [
+            {"provider": "ollama", "model": "llama3", "api_key": "sk-test"}
         ]}))
         from packages.llm_analysis.llm.detection import _config_has_keyed_models
         with patch.dict(os.environ, {"RAPTOR_CONFIG": str(config)}), \
              patch("packages.llm_analysis.llm.detection.OPENAI_SDK_AVAILABLE", False), \
              patch("packages.llm_analysis.llm.detection.ANTHROPIC_SDK_AVAILABLE", False):
-            assert _config_has_keyed_models() is False
+            assert _config_has_keyed_models() is True
 
 
 class TestWarnUnusableKeys:

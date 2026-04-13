@@ -135,6 +135,50 @@ RUN mkdir -p /opt/codeql \
     && ln -s /opt/codeql/codeql /usr/local/bin/codeql
 
 # ============================================================================
+# GO TOOLCHAIN (for subfinder, httpx, katana, nuclei)
+# ============================================================================
+
+ARG GO_VERSION=1.23.4
+RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz \
+    && tar -C /usr/local -xzf /tmp/go.tar.gz \
+    && rm /tmp/go.tar.gz \
+    && ln -s /usr/local/go/bin/go /usr/local/bin/go \
+    && ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
+
+ENV PATH="/usr/local/go/bin:${PATH}"
+ENV GOPATH="/root/go"
+ENV PATH="${GOPATH}/bin:${PATH}"
+
+# ============================================================================
+# RECON TOOLS (Go-based: subfinder, httpx, katana, nuclei)
+# ============================================================================
+
+RUN go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest \
+    && go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest \
+    && go install -v github.com/projectdiscovery/katana/cmd/katana@latest \
+    && go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest \
+    && nuclei -update-templates 2>/dev/null || true
+
+# ============================================================================
+# OWASP ZAP (web vulnerability scanning)
+# ============================================================================
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    default-jre-headless \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install ZAP via GitHub releases
+ARG ZAP_VERSION=2.15.0
+RUN mkdir -p /opt/zap \
+    && curl -fsSL "https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_Linux.tar.gz" -o /tmp/zap.tar.gz \
+    && tar -xzf /tmp/zap.tar.gz -C /opt/zap --strip-components=1 \
+    && rm /tmp/zap.tar.gz \
+    && ln -s /opt/zap/zap.sh /usr/local/bin/zap.sh \
+    || echo "ZAP installation failed - may need manual install"
+
+ENV PATH="/opt/zap:${PATH}"
+
+# ============================================================================
 # PYTHON DEPENDENCIES
 # ============================================================================
 
@@ -143,6 +187,9 @@ COPY requirements.txt requirements-dev.txt /tmp/
 COPY packages/web/requirements.txt /tmp/packages-web-requirements.txt
 
 RUN pip install --no-cache-dir -r /tmp/requirements-dev.txt
+
+# Install bandit for security scanning
+RUN pip install --no-cache-dir bandit>=1.7.0
 
 # Install web package dependencies (includes playwright)
 RUN pip install --no-cache-dir -r /tmp/packages-web-requirements.txt

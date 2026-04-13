@@ -34,7 +34,7 @@
   "mounts": [
     "source=${localWorkspaceFolder}/.env,target=/workspaces/raptor/.env,type=bind,consistency=cached"
   ],
-  "postCreateCommand": "pip install -r .devcontainer/requirements-all-optional.txt && pip install -r requirements-dev.txt",
+  "postCreateCommand": "pip install -r .devcontainer/requirements-all-optional.txt && pip install -r requirements-dev.txt && bash -c 'command -v go && echo Go installed || echo Go not found' && bash -c 'command -v subfinder && echo subfinder ready || echo subfinder not found' && bash -c 'command -v nuclei && echo nuclei ready || echo nuclei not found' && bash -c 'command -v zap.sh && echo ZAP ready || echo ZAP not found'",
   "postStartCommand": "sudo sh -c 'echo 1 > /proc/sys/kernel/perf_event_paranoid 2>/dev/null || true'",
   "remoteUser": "vscode"
 }

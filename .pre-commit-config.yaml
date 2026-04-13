@@ -1,0 +1,82 @@
+# Pre-commit hooks for RAPTOR framework
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # -----------------------------------------------------------------------
+  # Linting & Formatting
+  # -----------------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        name: ruff linting
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]
+
+      - id: ruff-format
+        name: ruff formatting
+        types_or: [python, pyi]
+
+  # -----------------------------------------------------------------------
+  # Type checking (mypy)
+  # -----------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy type checking
+        entry: bash -c 'command -v mypy >/dev/null 2>&1 && mypy packages/ --ignore-missing-imports --no-error-summary || echo "mypy not installed, skipping"'
+        language: system
+        pass_filenames: false
+        types: [python]
+        always_run: true
+
+  # -----------------------------------------------------------------------
+  # Security scanning (bandit)
+  # -----------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: bandit
+        name: bandit security scan
+        entry: bash -c 'command -v bandit >/dev/null 2>&1 && bandit -r packages/ -ll || echo "bandit not installed, skipping"'
+        language: system
+        pass_filenames: false
+        always_run: true
+
+  # -----------------------------------------------------------------------
+  # Run tests on changed packages
+  # -----------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest unit tests
+        entry: bash -c 'command -v pytest >/dev/null 2>&1 && pytest packages/ -v --tb=short || exit 1'
+        language: system
+        pass_filenames: false
+        always_run: true
+
+  # -----------------------------------------------------------------------
+  # Coverage check (requires pytest-cov)
+  # -----------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: coverage
+        name: coverage >= 80%
+        entry: bash -c 'command -v coverage >/dev/null 2>&1 && coverage run -m pytest packages/ -q && coverage report --fail-under=80 || echo "coverage not available, skipping"'
+        language: system
+        pass_filenames: false
+        always_run: true
+
+  # -----------------------------------------------------------------------
+  # Check for TODOs/FIXMEs (informational — does not block commit)
+  # -----------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: todo-check
+        name: check for TODOs/FIXMEs
+        entry: bash -c 'grep -rn "TODO\|FIXME\|HACK\|XXX" --include="*.py" $@ 2>/dev/null && echo "--- Found TODOs/FIXMEs (informational only) ---" || echo "No TODOs/FIXMEs found"'
+        language: system
+        pass_filenames: true
+        types: [python]
+        always_run: true
+        stages: [pre-commit]

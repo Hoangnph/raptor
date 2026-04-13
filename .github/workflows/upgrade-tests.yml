@@ -1,0 +1,66 @@
+name: Upgrade Tests
+
+on:
+  push:
+    branches: [feat/exploit-db-web-scanning-upgrade]
+  pull_request:
+    branches: [feat/exploit-db-web-scanning-upgrade]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  GO_VERSION: "1.23"
+
+jobs:
+  tests:
+    name: Tests & Linting
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run unit tests
+        run: |
+          pytest packages/ -v --tb=short
+
+      - name: Check coverage
+        run: |
+          coverage run -m pytest packages/ -v --tb=short
+          coverage report --fail-under=80
+
+      - name: Run ruff linting
+        run: |
+          ruff check .
+
+      - name: Run security checks
+        run: |
+          bandit -r packages/ -ll
+
+      - name: Report results
+        if: always()
+        run: |
+          echo "=== Upgrade Test Results ==="
+          echo "Python: ${{ env.PYTHON_VERSION }}"
+          echo "Go: ${{ env.GO_VERSION }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"

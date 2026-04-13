@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir *)",
+      "Read(//Users/autoeyes/Project/cy/**)",
+      "Read(//Users/autoeyes/Project/**)",
+      "Read(///**)",
+      "Read(//Users/autoeyes/Project/c/**)",
+      "Read(//Users/**)",
+      "WebFetch(gitlab.com)",
+      "WebFetch(github.com)",
+      "Bash(git checkout *)",
+      "Bash(python *)"
+    ]
+  },
+  "$version": 3
+}

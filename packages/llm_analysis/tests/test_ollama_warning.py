@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parents[3]))
 
 from packages.llm_analysis.llm.client import LLMClient
 from packages.llm_analysis.llm.config import ModelConfig, LLMConfig
+from packages.llm_analysis.llm.providers import LLMProvider
 
 
 class TestOllamaWarning:
@@ -77,20 +78,28 @@ class TestOllamaWarning:
             print(f"\n✅ Warning content validated: {warning}")
 
     def test_no_warning_for_cloud_providers(self, caplog):
-        """Test no warning for cloud providers (OpenAI, Anthropic, Gemini)."""
-        # Test with OpenAI if available
-        if not os.getenv("OPENAI_API_KEY"):
-            pytest.skip("No OPENAI_API_KEY - skipping cloud provider test")
+        """Test no warning for cloud providers (OpenAI, Anthropic, Gemini).
+
+        Mocks the provider to avoid needing real API keys, while still
+        validating that the warning logic correctly skips non-Ollama providers.
+        """
+        from unittest.mock import patch, Mock
 
         caplog.set_level(logging.WARNING)
 
         config = LLMConfig()
         config.primary_model = ModelConfig(
             provider="openai",
-            model_name="gpt-4o-mini"
+            model_name="gpt-4o-mini",
+            api_key="sk-test-key-not-used"
         )
 
-        client = LLMClient(config)
+        # Mock provider creation so no real API call is needed
+        mock_provider = Mock(spec=LLMProvider)
+        mock_provider.model_name = "gpt-4o-mini"
+
+        with patch("packages.llm_analysis.llm.client.create_provider", return_value=mock_provider):
+            client = LLMClient(config)
 
         # Check for Ollama warnings (should be none)
         ollama_warnings = [

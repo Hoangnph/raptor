@@ -351,29 +351,31 @@ def _config_has_keyed_models() -> bool:
 
         provider = entry.get("provider", "")
 
-        # Check SDK availability for this provider
-        if provider == "anthropic":
-            if not (ANTHROPIC_SDK_AVAILABLE or OPENAI_SDK_AVAILABLE):
-                continue
-        elif provider == "ollama":
-            if not OPENAI_SDK_AVAILABLE:
-                continue
-        elif provider == "gemini":
-            if not (GENAI_SDK_AVAILABLE or OPENAI_SDK_AVAILABLE):
-                continue
-        elif provider in ("openai", "mistral"):
-            if not OPENAI_SDK_AVAILABLE:
-                continue
-        else:
-            if not OPENAI_SDK_AVAILABLE:
-                continue
-
-        # Check if model has a key
-        if entry.get("api_key"):
-            return True
+        # Check if model has a key (inline takes precedence over env var)
+        has_inline_key = bool(entry.get("api_key"))
         env_key = PROVIDER_ENV_KEYS.get(provider)
-        if env_key and os.getenv(env_key):
+        has_env_key = bool(env_key and os.getenv(env_key))
+
+        if has_inline_key:
+            # Config entry with inline API key is usable regardless of SDK
+            # — the key is already resolved, no need to gate on SDK availability.
             return True
+
+        if has_env_key:
+            # Env var key — must have SDK to actually use it
+            if provider == "anthropic":
+                sdk_ok = ANTHROPIC_SDK_AVAILABLE or OPENAI_SDK_AVAILABLE
+            elif provider == "ollama":
+                sdk_ok = OPENAI_SDK_AVAILABLE
+            elif provider == "gemini":
+                sdk_ok = GENAI_SDK_AVAILABLE or OPENAI_SDK_AVAILABLE
+            elif provider in ("openai", "mistral"):
+                sdk_ok = OPENAI_SDK_AVAILABLE
+            else:
+                sdk_ok = OPENAI_SDK_AVAILABLE
+
+            if sdk_ok:
+                return True
 
     return False
 

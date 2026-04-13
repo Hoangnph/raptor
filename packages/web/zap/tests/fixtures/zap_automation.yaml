@@ -1,0 +1,14 @@
+env:
+  contexts:
+  - name: "Default Context"
+    urls:
+    - "https://example.com"
+jobs:
+- type: spider
+  parameters:
+    url: "https://example.com"
+    maxDuration: 5
+- type: activeScan
+  parameters:
+    url: "https://example.com"
+    maxDuration: 10

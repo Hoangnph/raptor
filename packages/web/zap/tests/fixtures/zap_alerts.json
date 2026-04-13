@@ -1,0 +1,74 @@
+[
+  {
+    "alert": "SQL Injection",
+    "risk": "High",
+    "confidence": "Medium",
+    "url": "https://example.com/login",
+    "param": "username",
+    "evidence": "' OR 1=1 --",
+    "cweid": "89",
+    "wascid": "19",
+    "description": "SQL injection may be possible",
+    "solution": "Use parameterized queries"
+  },
+  {
+    "alert": "Cross Site Scripting (Reflected)",
+    "risk": "High",
+    "confidence": "High",
+    "url": "https://example.com/search",
+    "param": "query",
+    "evidence": "<script>alert(1)</script>",
+    "cweid": "79",
+    "wascid": "8",
+    "description": "Cross-site scripting vulnerability detected",
+    "solution": "Validate all input and encode output"
+  },
+  {
+    "alert": "Missing Anti-CSRF Tokens",
+    "risk": "Medium",
+    "confidence": "High",
+    "url": "https://example.com/change-password",
+    "param": "",
+    "evidence": "",
+    "cweid": "352",
+    "wascid": "9",
+    "description": "Anti-CSRF tokens are missing",
+    "solution": "Implement anti-CSRF tokens"
+  },
+  {
+    "alert": "Information Disclosure - Sensitive Information in URL",
+    "risk": "Low",
+    "confidence": "Medium",
+    "url": "https://example.com/profile?token=abc123",
+    "param": "token",
+    "evidence": "token=abc123",
+    "cweid": "200",
+    "wascid": "13",
+    "description": "Sensitive information exposed in URL",
+    "solution": "Use POST requests for sensitive data"
+  },
+  {
+    "alert": "X-Content-Type-Options Header Missing",
+    "risk": "Low",
+    "confidence": "Medium",
+    "url": "https://example.com/",
+    "param": "",
+    "evidence": "",
+    "cweid": "693",
+    "wascid": "15",
+    "description": "X-Content-Type-Options header is missing",
+    "solution": "Add X-Content-Type-Options: nosniff header"
+  },
+  {
+    "alert": "Server Leaks Version Information",
+    "risk": "Informational",
+    "confidence": "High",
+    "url": "https://example.com/",
+    "param": "",
+    "evidence": "Server: Apache/2.4.41",
+    "cweid": "200",
+    "wascid": "13",
+    "description": "Web server version information disclosed",
+    "solution": "Configure server to hide version information"
+  }
+]
