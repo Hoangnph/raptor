@@ -92,7 +92,7 @@ class ZapScanner:
         if self.zap is None:
             return False
         try:
-            version = self.zap.core.version()
+            version = self.zap.core.version
             logger.info(f"ZAP version: {version}")
             return True
         except Exception as exc:
